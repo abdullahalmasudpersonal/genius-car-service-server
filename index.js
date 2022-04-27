@@ -11,7 +11,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    console.log('inside verifyJWT', authHeader);
+    next();
+}
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xwpgf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
@@ -25,11 +29,11 @@ async function run() {
 
         // auth
         app.post('/login', async (req, res) => {
-           const user = req.body;
-           const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-               expiresIn: '1d'
-           });
-           res.send({accessToken});
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
         })
 
         // services api
@@ -64,9 +68,8 @@ async function run() {
 
         // order collection api
 
-        app.get('/order', async (req, res) => {
-            const authHeader = req.headers.authorization;
-            console.log(authHeader);
+        app.get('/order', verifyJWT, async (req, res) => {
+
             const email = req.query.email;
             const query = { email: email };
             const cursor = orderCollection.find(query);

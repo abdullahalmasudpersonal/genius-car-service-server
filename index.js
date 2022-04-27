@@ -65,6 +65,8 @@ async function run() {
         // order collection api
 
         app.get('/order', async (req, res) => {
+            const authHeader = req.headers.authorization;
+            console.log(authHeader);
             const email = req.query.email;
             const query = { email: email };
             const cursor = orderCollection.find(query);
